@@ -8,8 +8,8 @@ export const Header = ()=>{
             </div>
             <div className="settings">
                 <ul>
-                    <li>+</li>
-                    <li><FaPizzaSlice/></li>
+                    <li className="settings__add" data-testid="quick-add-task-action" >+</li>
+                    <li data-testid="dark-mode-action" className="settings__darkmode" ><FaPizzaSlice/></li>
                 </ul>
             </div>
 

@@ -13,28 +13,37 @@ export const useTasks = (selectedProject) => {
         let unsubscribe  = firebase
             .firestore()
             .collection("tasks")
-            // .where("userId","==","")
+            .where("userId","==","")
 
-        unsubscribe = selectedProject && !collatedTasksExists(selectedProject) ?
-        (unsubscribe=unsubscribe.where("projectId","==",selectedProject))
-        :selectedProject === "TODAY" 
-        ?(unsubscribe = unsubscribe.where("date","==",moment().format("DD/MM/YYYY"))
-        )
-        :selectedProject === "INBOX" || selectedProject === 0
-        ?(unsubscribe = unsubscribe.where("date","==",""))
-        :unsubscribe; 
+        // unsubscribe = selectedProject && !collatedTasksExists(selectedProject) ?
+        // (unsubscribe=unsubscribe.where("projectId","==",selectedProject))
+        // :selectedProject === "TODAY" 
+        // ?(unsubscribe = unsubscribe.where("date","==",moment().format("DD/MM/YYYY"))
+        // )
+        // :selectedProject === "INBOX" || selectedProject === 0
+        // ?(unsubscribe = unsubscribe.where("date","==",""))
+        // :unsubscribe; 
+
+        if(selectedProject && !collatedTasksExists){
+            unsubscribe  =unsubscribe.where("projectId","==",selectedProject)
+        }else if(selectedProject == "TODAY"){
+            unsubscribe = unsubscribe.where("date","==",monet().format("DD/MM/YYYY"))
+        }else if(selectedProject === "INBOX" || selectedProject === 0){
+            unsubscribe = unsubscribe.where("date","==","")
+        }
 
         unsubscribe = unsubscribe.onSnapshot(snapshot=>{
             const newTasks = snapshot.docs.map(task=>({
                 id:task.id,...task.data()
             }))
-            
-            setTasks(selectedProject==="NEXT_7")
+            let filteredTasks = (selectedProject==="NEXT_7"
             ? newTasks.filter(task=>moment(task.date,"DD-MM-YYYY").diff(moment(),"days")<=7 &&
             task.archived !==true
             ):
             newTasks.filter(task=>task.archived !==true)
-            
+            )
+
+            setTasks(filteredTasks);
             setArchivedTasks(newTasks.filter(task=>task.archived!==false))
         })
         return unsubscribe;
@@ -50,16 +59,16 @@ export const useProjects = ()=>{
     useEffect(()=>{
         firebase
         .firestore()
-        .collection
+        .collection("projects")
         .where("userId","==","")
         .orderBy("projectId")
         .get()
         .then(snapshot=>{
-            const allProjects = snapshot.docs.map(project->({...project.data(),docId:project.id}))
+            const allProjects = snapshot.docs.map(project=>({...project.data(),docId:project.id}))
         })
 
         if(JSON.stringify(allProjects) !== JSON.stringify(projects)){
-            setProjects(allProjects)''
+            setProjects(allProjects);
         }
     },[projects])
 
